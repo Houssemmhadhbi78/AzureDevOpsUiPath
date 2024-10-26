@@ -1,0 +1,34 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: windows-latest
+
+steps:
+- task: UiPathInstallPlatform@5
+  inputs:
+    cliVersion: 'WIN_24.10.9050.17872'
+- task: UiPathPack@5
+  inputs:
+    versionType: 'AutoVersion'
+    projectJsonPath: '$(Build.ArtifactStagingDirectory)'
+    orchestratorConnection: 'orchestrator'
+    outputPath: '$(Build.ArtifactStagingDirectory)\Output'
+    traceLevel: 'Information'
+- task: UiPathDeploy@5
+  inputs:
+    orchestratorConnection: 'orchestrator'
+    packagesPath: '$(Build.ArtifactStagingDirectory)\Output'
+    folderName: 'TNR_Workday'
+    traceLevel: 'Information'
+- task: UiPathTest@5
+  inputs:
+    testTarget: 'TestSet'
+    orchestratorConnection: 'orchestrator'
+    parametersFilePath: '$(Build.ArtifactStagingDirectory)'
+    folderName: 'TNR_Workday'
